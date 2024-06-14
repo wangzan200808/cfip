@@ -1,4 +1,3 @@
-# 标准库
 import os
 import re
 import random
@@ -17,7 +16,6 @@ from urllib3.util.retry import Retry
 ips = "Fission_ip.txt"
 domains = "Fission_domain.txt"
 dns_result = "dns_result.txt"
-
 
 # 并发数配置
 max_workers_request = 20   # 并发请求数量
@@ -167,16 +165,15 @@ def main():
     if not os.path.exists(ips):
         with open(ips, 'w') as file:
             file.write("")
-    
-    # 判断是否存在域名文件
-    if not os.path.exists(domains):
-        with open(domains, 'w') as file:
-            file.write("")
 
-    # IP反查域名
+    # 读取IP文件并限制IP数量在一万条以内
     with open(ips, 'r') as ips_txt:
         ip_list = [ip.strip() for ip in ips_txt]
+        max_ips = 10000
+        if len(ip_list) > max_ips:
+            ip_list = ip_list[:max_ips]
 
+    # IP反查域名
     domain_list = fetch_domains_concurrently(ip_list)
     print("域名列表为")
     print(domain_list)
@@ -193,6 +190,16 @@ def main():
     # 域名解析IP
     perform_dns_lookups(domains, dns_result, ips)
     print("域名 -> IP 已完成")
+
+    # 保存IP到文件，确保文件中的IP数量不超过一万条
+    with open(ips, 'r') as file:
+        existing_ips = [ip.strip() for ip in file]
+    all_ips = list(set(existing_ips + ip_list))
+    if len(all_ips) > max_ips:
+        all_ips = all_ips[:max_ips]
+    with open(ips, 'w') as output:
+        for ip in all_ips:
+            output.write(ip + "\n")
 
 # 程序入口
 if __name__ == '__main__':
