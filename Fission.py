@@ -171,19 +171,21 @@ def main():
         with open(domains, 'w') as file:
             file.write("")
 
+    max_domains = 100
+    max_ips = 2000
+
     # IP反查域名
     with open(ips, 'r') as ips_txt:
         ip_list = [ip.strip() for ip in ips_txt]
-
-    # 限制IP地址数量不超过10000个
-    ip_list = ip_list[:10000]
 
     domain_list = fetch_domains_concurrently(ip_list)
     print("域名列表为")
     print(domain_list)
 
-    # 限制域名数量不超过100条
-    domain_list = domain_list[:100]
+    # 检查域名数量是否超过限制
+    if len(domain_list) > max_domains:
+        print(f"域名数量已达上限（{max_domains}），停止获取")
+        domain_list = domain_list[:max_domains]
 
     with open("Fission_domain.txt", "r") as file:
         exist_list = [domain.strip() for domain in file]
@@ -192,12 +194,19 @@ def main():
 
     with open("Fission_domain.txt", "w") as output:
         for domain in domain_list:
-            output.write(domain + "\n")
+            output.write(domain + "
+")
     print("IP -> 域名 已完成")
 
     # 域名解析IP
     perform_dns_lookups(domains, dns_result, ips)
     print("域名 -> IP 已完成")
+
+    # 检查IP数量是否超过限制
+    with open(ips, 'r') as ips_txt:
+        ip_list = [ip.strip() for ip in ips_txt]
+    if len(ip_list) > max_ips:
+        print(f"IP数量已达上限（{max_ips}），停止获取")
 
 # 程序入口
 if __name__ == '__main__':
