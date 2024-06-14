@@ -1,3 +1,4 @@
+# 标准库
 import os
 import re
 import random
@@ -16,6 +17,7 @@ from urllib3.util.retry import Retry
 ips = "Fission_ip.txt"
 domains = "Fission_domain.txt"
 dns_result = "dns_result.txt"
+
 
 # 并发数配置
 max_workers_request = 20   # 并发请求数量
@@ -100,18 +102,11 @@ def fetch_domains_for_ip(ip_address, session, attempts=0, used_sites=None):
 def fetch_domains_concurrently(ip_addresses):
     session = setup_session()
     domains = []
-    success_count = 0  # 添加一个变量来跟踪成功获取的域名数量
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers_request) as executor:
         future_to_ip = {executor.submit(fetch_domains_for_ip, ip, session): ip for ip in ip_addresses}
         for future in concurrent.futures.as_completed(future_to_ip):
-            fetched_domains = future.result()
-            domains.extend(fetched_domains)
-            success_count += len(fetched_domains)  # 更新成功获取的域名数量
-
-            if success_count >= 100:  # 当成功获取的域名数量达到100时，停止当前任务
-                print(f"已成功获取100个域名，停止当前任务。")
-                break
+            domains.extend(future.result())
 
     return list(set(domains))
 
@@ -190,15 +185,33 @@ def main():
 
     domain_list = list(set(domain_list + exist_list))
 
+    # 限制成功获取的域名数量为100个
+    max_domains = 100
     with open("Fission_domain.txt", "w") as output:
-        for domain in domain_list:
-            output.write(domain + "\n")
+        for i, domain in enumerate(domain_list):
+            if i < max_domains:
+                output.write(domain + "
+")
+            else:
+                break
     print("IP -> 域名 已完成")
 
     # 域名解析IP
     perform_dns_lookups(domains, dns_result, ips)
     print("域名 -> IP 已完成")
 
-# 程序入口
-if __name__ == '__main__':
-    main()
+    # 限制成功获取的IP数量为2000个
+    max_ips = 2000
+    with open(ips, 'r') as file:
+        ip_addresses = file.readlines()
+    unique_ips = []
+    for ip in ip_addresses:
+        if len(unique_ips) < max_ips:
+            unique_ips.append(ip.strip())
+        else:
+            break
+
+    with open(ips, 'w') as output:
+        for ip in unique_ips:
+            output.write(ip + '
+')
