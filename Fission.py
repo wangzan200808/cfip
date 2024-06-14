@@ -18,7 +18,6 @@ ips = "Fission_ip.txt"
 domains = "Fission_domain.txt"
 dns_result = "dns_result.txt"
 
-
 # 并发数配置
 max_workers_request = 20   # 并发请求数量
 max_workers_dns = 50       # 并发DNS查询数量
@@ -190,8 +189,7 @@ def main():
     with open("Fission_domain.txt", "w") as output:
         for i, domain in enumerate(domain_list):
             if i < max_domains:
-                output.write(domain + "
-")
+                output.write(domain + "\n")
             else:
                 break
     print("IP -> 域名 已完成")
@@ -213,5 +211,7 @@ def main():
 
     with open(ips, 'w') as output:
         for ip in unique_ips:
-            output.write(ip + '
-')
+            output.write(ip + '\n')
+
+if __name__ == "__main__":
+    main()
