@@ -5,3 +5,5 @@
 3. 在`Fission_ip.txt`中填入至少一个ip(可以是Cloudflare官方的IP，也可以是第三方优选IP)，多个ip按行排列
 4. 运行`Fission.py`
 5. 多次运行`Fission.py`即可获取大量优选IP/域名
+
+6. 这个是克隆的，如有冒犯请留言即可删除
