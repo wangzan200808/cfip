@@ -165,18 +165,26 @@ def main():
     if not os.path.exists(ips):
         with open(ips, 'w') as file:
             file.write("")
-
-    # 读取IP文件并限制IP数量在一万条以内
-    with open(ips, 'r') as ips_txt:
-        ip_list = [ip.strip() for ip in ips_txt]
-        max_ips = 10000
-        if len(ip_list) > max_ips:
-            ip_list = ip_list[:max_ips]
+    
+    # 判断是否存在域名文件
+    if not os.path.exists(domains):
+        with open(domains, 'w') as file:
+            file.write("")
 
     # IP反查域名
+    with open(ips, 'r') as ips_txt:
+        ip_list = [ip.strip() for ip in ips_txt]
+
+    # 限制IP地址数量不超过10000个
+    ip_list = ip_list[:10000]
+
     domain_list = fetch_domains_concurrently(ip_list)
     print("域名列表为")
     print(domain_list)
+
+    # 限制域名数量不超过100条
+    domain_list = domain_list[:100]
+
     with open("Fission_domain.txt", "r") as file:
         exist_list = [domain.strip() for domain in file]
 
@@ -190,16 +198,6 @@ def main():
     # 域名解析IP
     perform_dns_lookups(domains, dns_result, ips)
     print("域名 -> IP 已完成")
-
-    # 保存IP到文件，确保文件中的IP数量不超过一万条
-    with open(ips, 'r') as file:
-        existing_ips = [ip.strip() for ip in file]
-    all_ips = list(set(existing_ips + ip_list))
-    if len(all_ips) > max_ips:
-        all_ips = all_ips[:max_ips]
-    with open(ips, 'w') as output:
-        for ip in all_ips:
-            output.write(ip + "\n")
 
 # 程序入口
 if __name__ == '__main__':
