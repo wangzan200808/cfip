@@ -47,7 +47,7 @@ def main():
     # 删除所有现有的国家代码文件，除了指定的文件
     delete_existing_country_files(exceptions)
 
-    # 指定GeoLite2数据库文件的路径
+    # 指定GeoLite2数据库文件的路
     database_path = 'GeoLite2-Country.mmdb'
     with geoip2.database.Reader(database_path) as reader:
         ips = read_ips('Fission_ip.txt')
