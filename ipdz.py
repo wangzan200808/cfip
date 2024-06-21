@@ -31,15 +31,15 @@ def get_country_code(ip, reader):
 def get_location(ip):
     # 定义用于尝试获取IP位置信息的URL列表
     urls = [
-        "http://whois.pconline.com.cn/ipJson.jsp?ip={}".format(ip),  # 注意这里的修改，添加了ip参数
-        "http://ip-api.com/json/{}"  # 这个URL看起来是有效的，假设您已经处理了SSL问题
+        "http://whois.pconline.com.cn/ipJson.jsp?ip={}".format(ip),
+        "http://ip-api.com/json/{}".format(ip)  # 格式化字符串添加ip参数
     ]
     
     for url in urls:
         try:
             response = requests.get(url)
             if response.status_code == 200:
-                # 检查是否是JavaScript包装的JSON
+                # 检查响应是否包含IPCallBack，这表明响应是JavaScript包装的JSON
                 if "IPCallBack" in response.text:
                     # 使用正则表达式提取JSON字符串
                     match = re.search(r'IPCallBack$$(.*?)$$', response.text)
@@ -48,6 +48,7 @@ def get_location(ip):
                             # 提取JSON字符串并解析
                             json_str = match.group(1)
                             data = json.loads(json_str)
+                            # 根据实际响应结构提取省份或城市名称
                             location = data.get('pro', data.get('city', ''))
                             if location:
                                 return location
@@ -57,11 +58,11 @@ def get_location(ip):
                     # 如果响应不是通过IPCallBack返回的，直接解析JSON
                     data = response.json()
                     if data.get('status') == 'success':
+                        # 假设ip-api.com返回的国家代码在countryCode字段
                         return data.get('countryCode')
         except requests.RequestException as e:
             logging.error(f"Request error for IP {ip} using {url}: {e}")
     return None
-
 
 def save_ip_to_file(ip, country_code):
     if ip and country_code in KNOWN_COUNTRY_CODES:
