@@ -15,7 +15,7 @@ def download_geolite_mmdb(file_url, save_path):
 #file_url = '<url id="cpqfvntdl8mnd4l1cm00" type="url" status="failed" title="" wc="0">https://github.com/P3TERX/GeoLite.mmdb/releases/latest/download/GeoLite2-Country.mmdb</url>'
 #save_path = 'GeoLite2-Country.mmdb'  # 保存到当前脚本目录
 
-download_geolite_mmdb(file_url, save_path)
+#download_geolite_mmdb(file_url, save_path)
 
 # 下面是你的主脚本代码，现在你可以安全地假设GeoLite2-Country.mmdb已经下载并保存在当前目录
 # ...
