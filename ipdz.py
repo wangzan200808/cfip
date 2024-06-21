@@ -23,13 +23,17 @@ def get_country_code(ip, reader):
         return get_location(ip)  # 使用备用方法获取国家代码
 
 # 使用whois.pconline.com.cn和ip-api.com获取IP的地理位置信息
+# 使用whois.pconline.com.cn获取IP的地理位置信息
 def get_location(ip):
     try:
         response = requests.get(f"http://whois.pconline.com.cn/ipJson.jsp?ip={ip}")
         if response.status_code == 200:
-            data = response.json()
+            # 移除JSONP调用的部分，只保留JSON数据
+            jsonp_data = response.text.split('(')[1].rstrip(')') 
+            data = json.loads(jsonp_data)
             if 'err' not in data or data['err'] == "":
-                return data['proCode']  # 返回省代码作为国家代码的替代
+                # 返回省代码作为国家代码的替代，这里假设省代码可以作为国家代码
+                return data['proCode']
             else:
                 print(f"Error fetching location for IP {ip} using whois.pconline.com.cn: {data['err']}")
     except Exception as e:
@@ -45,20 +49,24 @@ def get_location(ip):
 
     return 'Unknown'  # 如果两个API都失败，则返回Unknown
 
+
+# 保存IP到对应的国家代码文件，并去除重复的IP地址
 # 保存IP到对应的国家代码文件，并去除重复的IP地址
 def save_ip_to_file(ip, country_code):
-    if ip and country_code:  # 确保IP和国家代码有效
+    # 只保存国家代码为'HK'或'JP'的IP地址
+    if ip and country_code in ['HK', 'JP']:
         filename = f'{country_code}.txt'
         # 确保文件存在，如果不存在则创建
         if not os.path.exists(filename):
-            open(filename, 'w').close()
+            with open(filename, 'w') as file:
+                file.write("")  # 使用with语句创建空文件
         # 打开文件并检查IP地址是否已经存在
         with open(filename, 'r') as file:
-            if ip + '\n' not in file.readlines():
+            if ip + '\n' not in file:
                 # 如果IP地址不存在，则写入
                 with open(filename, 'a') as file:
                     file.write(ip + '\n')
-
+                    
 # 删除所有.txt文件，除了特定的文件
 def delete_existing_country_files(exceptions):
     for file in glob.glob('*.txt'):
