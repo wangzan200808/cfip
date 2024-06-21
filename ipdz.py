@@ -3,6 +3,8 @@ import glob
 import logging
 import geoip2.database
 import requests
+import json
+import re
 
 # 配置日志
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -25,18 +27,41 @@ def get_country_code(ip, reader):
         logging.error(f"Error fetching data for IP {ip}: {e}")
         return None
 
+
 def get_location(ip):
-    for url in ["http://whois.pconline.com.cn/ipJson.jsp?ip=", "http://ip-api.com/json/"]:
+    # 定义用于尝试获取IP位置信息的URL列表
+    urls = [
+        "http://whois.pconline.com.cn/ipJson.jsp?ip={}".format(ip),  # 注意这里的修改，添加了ip参数
+        "http://ip-api.com/json/{}"  # 这个URL看起来是有效的，假设您已经处理了SSL问题
+    ]
+    
+    for url in urls:
         try:
-            response = requests.get(url + ip)
-            data = response.json()
-            if response.status_code == 200 and data.get('status') != 'fail':
-                location = data.get('pro', data.get('city', ''))
-                if location:
-                    return location
-        except Exception as e:
-            logging.error(f"Error fetching location for IP {ip} using {url}: {e}")
+            response = requests.get(url)
+            if response.status_code == 200:
+                # 检查是否是JavaScript包装的JSON
+                if "IPCallBack" in response.text:
+                    # 使用正则表达式提取JSON字符串
+                    match = re.search(r'IPCallBack$$(.*?)$$', response.text)
+                    if match:
+                        try:
+                            # 提取JSON字符串并解析
+                            json_str = match.group(1)
+                            data = json.loads(json_str)
+                            location = data.get('pro', data.get('city', ''))
+                            if location:
+                                return location
+                        except json.JSONDecodeError as e:
+                            logging.error(f"Invalid JSON object extracted for IP {ip}: {e}")
+                else:
+                    # 如果响应不是通过IPCallBack返回的，直接解析JSON
+                    data = response.json()
+                    if data.get('status') == 'success':
+                        return data.get('countryCode')
+        except requests.RequestException as e:
+            logging.error(f"Request error for IP {ip} using {url}: {e}")
     return None
+
 
 def save_ip_to_file(ip, country_code):
     if ip and country_code in KNOWN_COUNTRY_CODES:
