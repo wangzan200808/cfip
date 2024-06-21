@@ -24,11 +24,15 @@ def get_country_code(ip, reader):
 def save_ip_to_file(ip, country_code):
     if ip and country_code in ['HK', 'JP']:  # 确保IP和国家代码有效且为HK或JP
         filename = f'{country_code}.txt'
-        # 确保不会重复写入相同的IP地址
-        if ip + '\n' not in open(filename, 'r').readlines():
-            with open(filename, 'a') as file:
-                file.write(ip + '\n')
-
+        # 确保文件存在，如果不存在则创建
+        if not os.path.exists(filename):
+            open(filename, 'w').close()
+        # 打开文件并检查IP地址是否已经存在
+        with open(filename, 'r') as file:
+            if ip + '\n' not in file.readlines():
+                # 如果IP地址不存在，则写入
+                with open(filename, 'a') as file:
+                    file.write(ip + '\n')
 # 删除所有.txt文件，除了特定的文件
 def delete_existing_country_files(exceptions):
     for file in glob.glob('*.txt'):
