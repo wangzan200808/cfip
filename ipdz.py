@@ -37,7 +37,7 @@ def get_country_code(ip, reader):
 def save_ip_to_file(ip, country_code):
     country_code = country_code or 'Unknown'  # 避免保存到None.txt文件
     filename = f'{country_code}.txt'
-    with open(filename, 'w') as file:
+    with open(filename, 'a') as file:
         file.write(ip + '\n')
 
 # 主函数
