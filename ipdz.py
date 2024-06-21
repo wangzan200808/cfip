@@ -1,17 +1,40 @@
 import geoip2.database
 import requests
 import os
+import os
 
 def save_ip_to_file(ip, country_code):
-    country_code = country_code or 'Unknown'  # 避免保存到None.txt文件
+    country_code = country_code or 'Unknown'
     filename = f'{country_code}.txt'
     
-    # 检查文件是否存在，如果存在则删除
+    # 删除旧的文件（如果存在）
     if os.path.exists(filename):
         os.remove(filename)
     
+    # 将IP地址写入文件
     with open(filename, 'a') as file:
         file.write(ip + '\n')
+    
+    # 读取文件并去除重复的IP地址
+    with open(filename, 'r') as file:
+        lines = file.readlines()
+
+    # 使用集合来存储不重复的IP地址
+    unique_ips = set()
+    new_lines = []
+    for line in lines:
+        ip_in_line = line.strip()
+        if ip_in_line not in unique_ips:
+            unique_ips.add(ip_in_line)
+            new_lines.append(line)
+    
+    # 重新写入文件，只包含不重复的IP地址
+    with open(filename, 'w') as file:
+        file.writelines(new_lines)
+
+# 调用save_ip_to_file函数的示例
+save_ip_to_file('192.168.1.1', 'US')
+save_ip_to_file('192.168.1.1', 'US')  # 这个IP将不会被重复写入
 # 使用P3TERX仓库中的最新GeoLite2-Country.mmdb文件的直接下载链接
 #file_url = '<url id="cpqfvntdl8mnd4l1cm00" type="url" status="failed" title="" wc="0">https://github.com/P3TERX/GeoLite.mmdb/releases/latest/download/GeoLite2-Country.mmdb</url>'
 #save_path = 'GeoLite2-Country.mmdb'  # 保存到当前脚本目录
