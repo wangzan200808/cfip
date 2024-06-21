@@ -25,6 +25,10 @@ def save_ip_to_file(ip, country_code):
     country_code = country_code or 'Unknown'
     filename = f'{country_code}.txt'
     
+    # 如果文件存在，先删除它
+    if os.path.exists(filename):
+        os.remove(filename)
+    
     # 确保不会重复写入相同的IP地址
     if not os.path.exists(filename) or ip + '\n' not in open(filename, 'r').readlines():
         with open(filename, 'a') as file:
