@@ -54,7 +54,7 @@ def get_location(ip):
 # 保存IP到对应的国家代码文件，并去除重复的IP地址
 def save_ip_to_file(ip, country_code):
     # 只保存国家代码为'HK'或'JP'的IP地址
-    if ip and country_code in ['HK', 'JP']:
+   # if ip and country_code in ['HK', 'JP']:
         filename = f'{country_code}.txt'
         # 确保文件存在，如果不存在则创建
         if not os.path.exists(filename):
