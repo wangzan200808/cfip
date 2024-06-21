@@ -185,7 +185,7 @@ def main():
     domain_list = list(set(domain_list + exist_list))
 
     # 限制成功获取的域名数量为100个
-    max_domains = 100
+    max_domains = 500
     with open("Fission_domain.txt", "w") as output:
         for i, domain in enumerate(domain_list):
             if i < max_domains:
@@ -199,7 +199,7 @@ def main():
     print("域名 -> IP 已完成")
 
     # 限制成功获取的IP数量为2000个
-    max_ips = 2000
+    max_ips = 10000
     with open(ips, 'r') as file:
         ip_addresses = file.readlines()
     unique_ips = []
