@@ -31,16 +31,11 @@ def save_ip_to_file(ip, country_code):
             file.write(ip + '\n')
 # 删除所有以国家代码命名的.txt文件，除了特定的文件
 def delete_existing_country_files(exceptions):
-    # 定义国家代码的正则表达式模式
-    country_code_pattern = r'[A-Z]{2}\.txt$'
-    
     # 遍历当前目录中的所有.txt文件
     for file in glob.glob('*.txt'):
-        # 检查文件是否在排除列表中或是否符合国家代码模式
-        if file in exceptions or re.match(country_code_pattern, file):
-            continue
-        os.remove(file)
-
+        # 检查文件是否在排除列表中
+        if file not in exceptions:
+            os.remove(file)
 # 主函数
 def main():
     # 指定不删除的文件列表
