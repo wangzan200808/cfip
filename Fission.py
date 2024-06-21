@@ -160,41 +160,8 @@ def perform_dns_lookups(domain_filename, result_filename, unique_ipv4_filename):
     except Exception as e:
         print(f"Error performing DNS lookups: {e}")
 
-def main():
-    # 读取IP文件中的IP地址列表
-    with open(ips, 'r') as ips_txt:
-        ip_list = [ip.strip() for ip in ips_txt]
-
-    # 读取域名文件中的域名列表
-    with open(domains, 'r') as domains_txt:
-        domain_list = [domain.strip() for domain in domains_txt]
-
-    # 读取DNS查询结果文件
-    with open(dns_result, 'r') as dns_result_txt:
-        dns_results = dns_result_txt.readlines()
-
-    # 清空文件，准备写入新的结果
-    with open(ips, 'w') as file:
-        pass  # 清空ips文件
-
-    with open(domains, 'w') as file:
-        pass  # 清空domains文件
-
-    with open(dns_result, 'w') as file:
-        pass  # 清空dns_result文件
-
-    # 接下来的代码...
-    # 这里可以开始你的处理逻辑，使用ip_list, domain_list, dns_results等变量
-
-    # 例如，执行IP反查域名的操作
-    # domain_list = fetch_domains_concurrently(ip_list)
-    # 将新获取的域名写入文件
-    # with open(domains, 'a') as file:
-    #     for domain in domain_list:
-    #         file.write(domain + '\n')
-
-    # 类似地处理其他数据和写入操作
 # 主函数
+def main():
     # 判断是否存在IP文件
     if not os.path.exists(ips):
         with open(ips, 'w') as file:
