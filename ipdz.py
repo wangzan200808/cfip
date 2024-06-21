@@ -12,8 +12,8 @@ def download_geolite_mmdb(file_url, save_path):
         print(f"Failed to download the file. Status code: {response.status_code}")
 
 # 使用P3TERX仓库中的最新GeoLite2-Country.mmdb文件的直接下载链接
-file_url = '<url id="cpqfvntdl8mnd4l1cm00" type="url" status="failed" title="" wc="0">https://github.com/P3TERX/GeoLite.mmdb/releases/latest/download/GeoLite2-Country.mmdb</url>'
-save_path = 'GeoLite2-Country.mmdb'  # 保存到当前脚本目录
+#file_url = '<url id="cpqfvntdl8mnd4l1cm00" type="url" status="failed" title="" wc="0">https://github.com/P3TERX/GeoLite.mmdb/releases/latest/download/GeoLite2-Country.mmdb</url>'
+#save_path = 'GeoLite2-Country.mmdb'  # 保存到当前脚本目录
 
 download_geolite_mmdb(file_url, save_path)
 
