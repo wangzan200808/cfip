@@ -43,7 +43,7 @@ def save_ip_to_file(ip, country_code):
 # 主函数
 def main():
     # 指定GeoLite2数据库文件的路径
-    database_path = 'path/to/GeoLite2-Country.mmdb'
+    database_path = 'GeoLite2-Country.mmdb'
     with geoip2.database.Reader(database_path) as reader:
         ips = read_ips('Fission_ip.txt')
         for ip in ips:
