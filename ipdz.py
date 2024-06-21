@@ -1,98 +1,64 @@
 import os
 import glob
-import logging
 import geoip2.database
-import requests
-import json
-import re
 
-# 配置日志
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-# 其他配置
-EXCEPTION_FILES = ['requirements.txt', 'dns_result.txt', 'Fission_domain.txt', 'Fission_ip.txt']
-GEOIP_DATABASE_PATH = 'GeoLite2-Country.mmdb'
-IP_FILE = 'Fission_ip.txt'
-KNOWN_COUNTRY_CODES = ['HK', 'JP']
-
+# 读取IPv4地址的文件
 def read_ips(filename):
-    with open(filename, 'r') as file:
-        return [line.strip() for line in file if line.strip()]
+    try:
+        with open(filename, 'r') as file:
+            return [line.strip() for line in file if line.strip()]
+    except FileNotFoundError:
+        print(f"The file {filename} was not found.")
+        return []
 
+# 使用geoip2获取IP的国家代码
 def get_country_code(ip, reader):
     try:
         response = reader.country(ip)
         return response.country.iso_code
     except Exception as e:
-        logging.error(f"Error fetching data for IP {ip}: {e}")
-        return None
+        print(f"Error fetching data for IP {ip}: {e}")
+        return 'Unknown'
 
-
-def get_location(ip):
-    # 定义用于尝试获取IP位置信息的URL列表
-    urls = [
-        "http://whois.pconline.com.cn/ipJson.jsp?ip={}".format(ip),
-        "http://ip-api.com/json/{}".format(ip)  # 格式化字符串添加ip参数
-    ]
-    
-    for url in urls:
-        try:
-            response = requests.get(url)
-            if response.status_code == 200:
-                # 检查响应是否包含IPCallBack，这表明响应是JavaScript包装的JSON
-                if "IPCallBack" in response.text:
-                    # 使用正则表达式提取JSON字符串
-                    match = re.search(r'IPCallBack$$(.*?)$$', response.text)
-                    if match:
-                        try:
-                            # 提取JSON字符串并解析
-                            json_str = match.group(1)
-                            data = json.loads(json_str)
-                            # 根据实际响应结构提取省份或城市名称
-                            location = data.get('pro', data.get('city', ''))
-                            if location:
-                                return location
-                        except json.JSONDecodeError as e:
-                            logging.error(f"Invalid JSON object extracted for IP {ip}: {e}")
-                else:
-                    # 如果响应不是通过IPCallBack返回的，直接解析JSON
-                    data = response.json()
-                    if data.get('status') == 'success':
-                        # 假设ip-api.com返回的国家代码在countryCode字段
-                        return data.get('countryCode')
-        except requests.RequestException as e:
-            logging.error(f"Request error for IP {ip} using {url}: {e}")
-    return None
-
+# 保存IP到对应的国家代码文件，并去除重复的IP地址
 def save_ip_to_file(ip, country_code):
-    if ip and country_code in KNOWN_COUNTRY_CODES:
+    if ip and country_code in ['HK', 'JP']:  # 确保IP和国家代码有效且为HK或JP
         filename = f'{country_code}.txt'
+        # 确保文件存在，如果不存在则创建
         if not os.path.exists(filename):
             open(filename, 'w').close()
-        with open(filename, 'a+') as file:
-            if ip + '\n' not in file:
-                file.write(ip + '\n')
-
+        # 打开文件并检查IP地址是否已经存在
+        with open(filename, 'r') as file:
+            if ip + '\n' not in file.readlines():
+                # 如果IP地址不存在，则写入
+                with open(filename, 'a') as file:
+                    file.write(ip + '\n')
+# 删除所有.txt文件，除了特定的文件
 def delete_existing_country_files(exceptions):
     for file in glob.glob('*.txt'):
         if file not in exceptions:
             try:
                 os.remove(file)
             except OSError as e:
-                logging.error(f"Error deleting file {file}: {e}")
+                print(f"Error deleting file {file}: {e}")
 
+# 主函数
 def main():
-    delete_existing_country_files(EXCEPTION_FILES)
-    with geoip2.database.Reader(GEOIP_DATABASE_PATH) as reader:
-        ips = read_ips(IP_FILE)
+    # 指定不删除的文件列表
+    exceptions = ['requirements.txt', 'dns_result.txt', 'Fission_domain.txt', 'Fission_ip.txt']
+
+    # 删除所有现有的.txt文件，除了指定的文件
+    delete_existing_country_files(exceptions)
+
+    # 指定GeoLite2数据库文件的路径
+    database_path = 'GeoLite2-Country.mmdb'
+    with geoip2.database.Reader(database_path) as reader:
+        ips = read_ips('Fission_ip.txt')
         for ip in ips:
             country_code = get_country_code(ip, reader)
-            if country_code is None:
-                location = get_location(ip)
-                if location:
-                    country_code = location.split()[-1]  # 假设国家代码是location的最后一个词
-            if country_code in KNOWN_COUNTRY_CODES:
-                save_ip_to_file(ip, country_code)
+            save_ip_to_file(ip, country_code)
 
 if __name__ == '__main__':
     main()
+
+增加到这个脚本处理Unknown的ip
