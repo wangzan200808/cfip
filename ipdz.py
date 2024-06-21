@@ -2,15 +2,16 @@ import geoip2.database
 import requests
 import os
 
-def download_geolite_mmdb(file_url, save_path):
-    response = requests.get(file_url, stream=True)
-    if response.status_code == 200:
-        with open(save_path, 'wb') as f:
-            for chunk in response.iter_content(chunk_size=1024):
-                f.write(chunk)
-    else:
-        print(f"Failed to download the file. Status code: {response.status_code}")
-
+def save_ip_to_file(ip, country_code):
+    country_code = country_code or 'Unknown'  # 避免保存到None.txt文件
+    filename = f'{country_code}.txt'
+    
+    # 检查文件是否存在，如果存在则删除
+    if os.path.exists(filename):
+        os.remove(filename)
+    
+    with open(filename, 'a') as file:
+        file.write(ip + '\n')
 # 使用P3TERX仓库中的最新GeoLite2-Country.mmdb文件的直接下载链接
 #file_url = '<url id="cpqfvntdl8mnd4l1cm00" type="url" status="failed" title="" wc="0">https://github.com/P3TERX/GeoLite.mmdb/releases/latest/download/GeoLite2-Country.mmdb</url>'
 #save_path = 'GeoLite2-Country.mmdb'  # 保存到当前脚本目录
