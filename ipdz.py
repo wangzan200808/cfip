@@ -1,10 +1,7 @@
-import geoip2.database
-import requests
 import os
-
-# 定义下载GeoLite2-Country.mmdb的函数（如果需要）
-# def download_geolite_mmdb(file_url, save_path):
-#     ...
+import glob
+import re
+import geoip2.database
 
 # 读取IPv4地址的文件
 def read_ips(filename):
@@ -25,17 +22,31 @@ def save_ip_to_file(ip, country_code):
     country_code = country_code or 'Unknown'
     filename = f'{country_code}.txt'
     
-    # 如果文件存在，先删除它
-    if os.path.exists(filename):
-        os.remove(filename)
-    
     # 确保不会重复写入相同的IP地址
-    if not os.path.exists(filename) or ip + '\n' not in open(filename, 'r').readlines():
+    if ip + '\n' not in open(filename, 'r').readlines():
         with open(filename, 'a') as file:
             file.write(ip + '\n')
 
+# 删除所有以国家代码命名的.txt文件，除了特定的文件
+def delete_existing_country_files(exceptions):
+    # 定义国家代码的正则表达式模式
+    country_code_pattern = r'[A-Z]{2}\.txt$'
+    
+    # 遍历当前目录中的所有.txt文件
+    for file in glob.glob('*.txt'):
+        # 检查文件是否在排除列表中或是否符合国家代码模式
+        if file in exceptions or re.match(country_code_pattern, file):
+            continue
+        os.remove(file)
+
 # 主函数
 def main():
+    # 指定不删除的文件列表
+    exceptions = ['requirements.txt', 'dns_result.txt', 'Fission_domain.txt', 'Fission_ip.txt']
+
+    # 删除所有现有的国家代码文件，除了指定的文件
+    delete_existing_country_files(exceptions)
+
     # 指定GeoLite2数据库文件的路径
     database_path = 'GeoLite2-Country.mmdb'
     with geoip2.database.Reader(database_path) as reader:
