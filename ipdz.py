@@ -60,5 +60,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-增加到这个脚本处理Unknown的ip
