@@ -19,8 +19,8 @@ domains = "Fission_domain.txt"
 dns_result = "dns_result.txt"
 
 # 并发数配置
-max_workers_request = 20   # 并发请求数量
-max_workers_dns = 50       # 并发DNS查询数量
+max_workers_request = 200   # 并发请求数量20
+max_workers_dns = 500       # 并发DNS查询数量50
 
 # 生成随机User-Agent
 ua = UserAgent()
@@ -199,7 +199,7 @@ def main():
     print("域名 -> IP 已完成")
 
     # 限制成功获取的IP数量为2000个
-    max_ips = 2000
+    max_ips = 10000
     with open(ips, 'r') as file:
         ip_addresses = file.readlines()
     unique_ips = []
